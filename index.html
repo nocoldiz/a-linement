@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://kit.fontawesome.com/d6394b12bf.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!---------------GLOBAL STYLE----------------->
+    <style>
+        button {
+            background-color: #4caf50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .modal-content {
+
+            max-height: 90vh;
+        }
+
+        .modal-body {
+            overflow-y: scroll;
+        }
+    </style>
+    <!---------------JQUERY CODE----------------->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        var loadedFile = null;
+        var subsType = "ass";
+        $(document).on("input", "input:file", function (e) {
+            let targetFile = e.target.files[0];
+
+            let fileName = e.target.files[0].name;
+            subsType = fileName.split('.').pop();
+
+            var FR = new FileReader();
+
+            FR.readAsText(targetFile);
+            FR.onload = function (data) {
+                var myVar = data.target.result;
+                loadedFile = myVar;
+                $("#123").html(myVar);
+            }
+
+
+
+
+        });
+        $(document).ready(function () {
+
+            loadData();
+
+            function loadData() {
+                if (localStorage.getItem("doc")) {
+                    var tempArray = JSON.parse(localStorage.getItem("doc"));
+
+                    for (let i = 0; i < 10; i++) {
+                        $("#textarea" + parseInt(i + 1)).val(tempArray[i]);
+
+
+                        // splitElement.unshift(headerElement);
+                    }
+                }
+                if (localStorage.getItem("labels")) {
+                    var tempArray = JSON.parse(localStorage.getItem("labels"));
+
+                    for (let i = 0; i < 10; i++) {
+                        $("#label" + parseInt(i + 1)).val(tempArray[i]);
+
+                        // splitElement.unshift(headerElement);
+                    }
+                }
+            }
+
+
+            //Array to table
+            var arrayToTable = function (data, options) {
+                "use strict";
+                var table = $("<table />"),
+                    thead,
+                    tfoot,
+                    rows = [],
+                    row,
+                    titleRow,
+                    fullPhrase,
+                    i,
+                    j,
+                    k,
+                    defaults = {
+                        th: true, // should we use th elemenst for the first row
+                        thead: false, //should we incldue a thead element with the first row
+                        tfoot: false, // should we include a tfoot element with the last row
+                        attrs: {}, // attributes for the table element, can be used to
+                    };
+
+                options = $.extend(defaults, options);
+
+                table.attr(options.attrs);
+
+                var tables = data;
+                var labelsArray = [];
+                for (let i = 1; i <= 10; i++) {
+                    var test = document.getElementById("label" + i).value;
+                    labelsArray.push(test);
+                }
+                // loop through all the rows, we will deal with tfoot and thead later
+
+                var maxRigheW = 0;
+                var maxRigheF = 0;
+                var maxRigheT = 0;
+                var maxK = 0;
+
+                tables.forEach((phrases) => {
+                    if (phrases.length > maxRigheF) {
+                        maxRigheF = phrases.length;
+                    }
+                    phrases.forEach((words) => {
+                        if (words.length > maxRigheW) {
+                            maxRigheW = words.length;
+                        }
+                        words.forEach((item) => { });
+                    });
+                });
+                var maxRigheTotal = maxRigheW * maxRigheF;
+                var setHeader = false;
+
+                tables.forEach((phrases, index) => {
+                    row = $("<tr />");
+                    var flagLastPhrase = false;
+                    //Add Table name as header
+                    row.append($("<td style='border: 1px solid black;' />").html(labelsArray[index]));
+
+
+                    phrases.forEach((words, j) => {
+                        for (var k = 0; k < maxRigheTotal; k++) {
+                            var lastWord = words.length;
+                            if (words[k]) {
+                                if (j == 0) {
+                                    console.log(labelsArray);
+
+                                    row.append($("<td style='border: 1px solid black;' />").html(words[k]));
+                                } else {
+                                    row.append(
+                                        $("<td style='border: 1px solid black;' />").html(words[k])
+                                    );
+                                }
+
+                            }
+
+                            if (k == lastWord) {
+                                //Add empty cell
+                                row.append(
+                                    $(
+                                        "<td style='border: 1px solid black; height: 20px;width: 20px' />"
+                                    ).html("")
+                                );
+                            }
+                        }
+                        words.forEach((item, k) => { });
+
+                        if (Object.is(phrases.length - 1, j)) {
+                            // execute last item logic
+                            for (var i = 0; i < maxRigheTotal; i++) {
+                                row.append(
+                                    $(
+                                        "<td style='border: 1px solid black; height: 20px;width: 20px'' />"
+                                    ).html("")
+                                );
+                            }
+                        }
+                    });
+
+
+                    rows.push(row);
+                });
+                //Add index
+                var headerRow = $("<tr />");
+                for (i = 0; i < maxRigheTotal * 2; i = i + 1) {
+                    if (i == 0) {
+                        headerRow.append($("<td style='border: 1px solid black; height: 20px;width: 20px'' />").html("#"));
+
+                    } else {
+                        headerRow.append($("<td style='border: 1px solid black; height: 20px;width: 20px'' />").html(i));
+
+                    }
+                }
+
+                // add all the rows
+                table.append(headerRow);
+
+                for (i = 0; i < rows.length; i = i + 1) {
+
+                    table.append(rows[i]);
+                }
+
+                return table;
+            };
+
+            var listaArray = [];
+            var splitArray = [];
+            var tableArray = [];
+
+            function writeTable(tableIndex) {
+                listaArray = [];
+                listaLabel = [];
+
+                splitArray = [];
+                tableArray = [];
+                listaArray = document
+                    .getElementById("textarea" + tableIndex)
+                    .value.split(/\n/);
+                for (let i = 0; i < listaArray.length; i++) {
+                    if (listaArray[i].indexOf("*") <= -1) {
+                        listaArray[i] = listaArray[i].concat("*");
+                    }
+                    var splitElement = listaArray[i].split("*");
+                    var headerElement = listaArray[i].replaceAll("*", " ");
+                    splitArray[i] = splitElement;
+                }
+                return splitArray;
+            }
+            // External file conversion
+            $("#convertisub").click(function () {
+                try {
+                    var lines = loadedFile.split("\n");
+
+                } catch (err) {
+                    alert("Error: load a subs file, currently supported extensions: .srt .ass")
+                    return;
+                }
+
+                var coltext = [];
+                switch (subsType) {
+                    case "ass":
+                        $.each(lines, function (n, elem) {
+                            if (elem.startsWith("Dialogue")) {
+                                var count = 0;
+                                var splitAt = 0;
+                                for (var i = 0; i < elem.length; i++) {
+                                    if (elem[i] === ",") {
+                                        count = count + 1;
+                                    }
+                                    if (count == 9) {
+                                        splitAt = i;
+                                        break;
+                                    }
+                                }
+                                var trunc = elem.substr(splitAt - 1, elem.length).replace(',,', '');
+                                coltext.push(trunc);
+                            }
+                        });
+                        break;
+                    case "srt":
+                        $.each(lines, function (n, elem) {
+                        var buffer = [];
+
+                            if (elem && elem.includes("-->")) {
+                                var count = 0;
+                                var splitAt = 0;
+                                for (var i = 1; i < 5; i++) {
+                                    buffer.push(lines[n + i]);
+                                    if (lines[n + i] && lines[n + i]==="") {
+                                        break;
+                                    }
+                                }
+
+                            }
+                            buffer.pop();
+                            coltext.push(buffer.join(""));
+                        });
+                        break;
+                    default:
+                        alert("File tipe not supported");
+
+                        break;
+                }
+
+                $("#conversionArea").val(coltext);
+                console.log(coltext);
+                $('#conversionModal').modal('show')
+                var tbody = $('#conversionTable tbody'),
+                    props = ["ReservNum", "Guest Name", "Status", "Arrival", "Departure", "Type"];
+                $.each(coltext, function (i, col) {
+                    var tr = $('<tr>');
+                    $('<td>').html(col).appendTo(tr);
+                    tbody.append(tr);
+                });
+
+                var file = $('#fileinput')[0].files[0]
+                if (file) {
+                    //    console.log(file);
+                    $.get(file, function (data) {
+                    }, 'text');
+
+                }
+
+
+
+                var myFile = $('#fileinput').prop('files');
+                // console.log(myFile);
+
+                var fileReader = new FileReader();
+                fileReader.onload = function () {
+                    var data = fileReader.result;  // data <-- in this var you have the file data in Base64 format
+                    //   console.log(data.toString());
+                    var decodedStringAtoB = atob(data.toString());
+                    //   console.log(decodedStringAtoB);
+
+                    let base64ToString = Buffer.from(data, "base64").toString();
+                    base64ToString = JSON.parse(base64ToString);
+                    //   console.log(base64ToString);
+
+                };
+                fileReader.readAsDataURL($('#fileinput').prop('files')[0]);
+            });
+
+            //Click callbacks
+            $("#reset").click(function () {
+                if (confirm("Do you want to reset the form?") == true) {
+                    for (let i = 1; i < 11; i++) {
+                        // splitElement.unshift(headerElement);
+                        $("#textarea" + i).val("");
+                        $("#tableArea").empty();
+                    }
+                } else {
+                }
+            });
+            $("#sostituisci").click(function () {
+                if (confirm("Do you want to replace newlines with * ?") == true) {
+                    for (let i = 1; i < 11; i++) {
+                        // splitElement.unshift(headerElement);
+                        let temp = $("#textarea" + i).val();
+
+                        $("#textarea" + i).val(
+                            temp
+                                .replaceAll(new RegExp("\r?\n", "g"), "*")
+                                .replaceAll("***", "*")
+                                .replaceAll("**", "*")
+                        );
+                    }
+                } else {
+                }
+            });
+            $("#grassetto").click(function () {
+                let bold = prompt("Insert the text to convert", "");
+                if (bold == null || bold == "") {
+                } else {
+                    text = "<b>" + bold + "</b>";
+                }
+
+                if (alert(text) == true) {
+                }
+            });
+            $("#salva").click(function () {
+                if (confirm("Do you want to save the document?") == true) {
+                    var tempArray = [];
+                    for (let i = 1; i < 11; i++) {
+                        // splitElement.unshift(headerElement);
+                        let temp = $("#textarea" + i).val();
+                        tempArray.push(temp);
+                    }
+                    localStorage.setItem("doc", JSON.stringify(tempArray));
+                    tempArray = [];
+                    for (let i = 1; i < 11; i++) {
+                        // splitElement.unshift(headerElement);
+                        let temp = $("#label" + i).val();
+                        tempArray.push(temp);
+                    }
+                    localStorage.setItem("labels", JSON.stringify(tempArray));
+
+                }
+            });
+            $("#carica").click(function () {
+                if (
+                    confirm("Do you want to load the last saved version?") == true
+                ) {
+                    loadData();
+
+                }
+            });
+            $("#carica").click(function () {
+                if (
+                    confirm("Do you want to load the last saved version?") == true
+                ) {
+                    loadData();
+
+                }
+            });
+            $("#converti").click(function () {
+                var gridMaster = [];
+                for (var i = 1; i <= 10; i++) {
+                    try {
+                        var tableToWrite = writeTable(i);
+                        gridMaster.push(tableToWrite);
+                    } catch (err) { }
+                }
+                console.log(gridMaster);
+                var table = arrayToTable(gridMaster, {
+                    thead: false,
+                    attrs: {
+                        class: "table",
+                    },
+                });
+                $("#tableArea").empty();
+                $("#tableArea").append(table);
+                $(".table").each(function () {
+                    var $this = $(this);
+                    var newrows = [];
+                    $this.find("tr").each(function () {
+                        var i = 0;
+                        $(this)
+                            .find("td")
+                            .each(function () {
+                                i++;
+                                if (newrows[i] === undefined) {
+                                    newrows[i] = $("<tr></tr>");
+                                }
+                                newrows[i].append($(this));
+                            });
+                    });
+                    $this.find("tr").remove();
+                    $.each(newrows, function () {
+                        $this.append(this);
+                    });
+                });
+                $("#copyclipboard").click(function () {
+                    var r = document.createRange();
+                    r.selectNode(document.getElementById("tableArea"));
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(r);
+                    document.execCommand('copy');
+                    window.getSelection().removeAllRanges();
+
+
+                }
+                );
+                $('#tableModal').modal('show')
+
+                /*
+                      $("table").each(function () {
+                        var $this = $(this);
+                        var newrows = [];
+                        $this.find("tr").each(function () {
+                          var i = 0;
+                          $(this)
+                            .find("td,th")
+                            .each(function () {
+                              i++;
+                              if (newrows[i] === undefined) {
+                                newrows[i] = $("<tr></tr>");
+                              }
+                              newrows[i].append($(this));
+                            });
+                        });
+                        $this.find("tr").remove();
+                        $.each(newrows, function () {
+                          $this.append(this);
+                        });
+                      });*/
+            });
+        });
+    </script>
+</head>
+
+<!-- BODY -->
+
+<body></body>
+<nav class="navbar navbar-expand-sm bg-light">
+    <!-- NAVBAR -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <button id="converti" type="submit" value="Converti"><i class="fas fa-table"></i> Convert to table </button>
+        </li>
+        <li class="nav-item">
+            <button id="reset" type="submit" value="Reset"> <i class="fas fa-redo"></i> Reset</button>
+        </li>
+        <li class="nav-item">
+            <button id="sostituisci" type="submit" value="Sostituisci a capo"> <i class="fas fa-level-down-alt"></i>
+                Replace newline</button>
+        </li>
+        <li class="nav-item">
+            <button id="grassetto" type="submit" value="Grassetto"><i class="fas fa-bold"></i> Bold text </button>
+        </li>
+        <li class="nav-item">
+            <button id="salva" type="submit" value="Salva"> <i class="fa-solid fa-floppy-disk"></i> Save
+                document</button>
+        </li>
+        <li class="nav-item">
+            <button id="carica" type="submit" value="Carica"> <i class="fas fa-folder-open"></i> Load Document</button>
+        </li>
+
+        <li class="nav-item">
+            <button id="convertisub" type="submit" value="Carica"> <i class="fas fa-folder-open"></i> Convert
+                subs file</button>
+        </li>
+        <li> <input class="form-control" type="file" id="fileinput">
+        </li>
+
+
+    </ul>
+
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 1" id="label1" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea1" rows="30" cols="20"></textarea>
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 2" id="label2" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea2" rows="30" cols="20"></textarea>
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 3" id="label3" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea3" rows="30" cols="20"></textarea>
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 4" id="label4" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea4" rows="30" cols="20"></textarea>
+
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 5" id="label5" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea5" rows="30" cols="20"></textarea>
+
+        </div>
+
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 6" id="label6" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea6" rows="30" cols="20"></textarea>
+
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 7" id="label7" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea7" rows="30" cols="20"></textarea>
+
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 8" id="label8" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea8" rows="30" cols="20"></textarea>
+
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 9" id="label9" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea9" rows="30" cols="20"></textarea>
+
+        </div>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" placeholder="Column 10" id="label10" value=""></input>
+            <textarea class="form-control" aria-label="With textarea" id="textarea10" rows="30" cols="20"></textarea>
+
+        </div>
+
+    </div>
+</div>
+<div class="modal " id="tableModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Table output</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="tableArea" style="display: flex; flex-direction: row"></div>
+            </div>
+            <div class="modal-footer">
+                <!--                <button type="button" class="btn btn-primary"> <i class="fas fa-copy"></i> Copy to clipboard</button>
+-->
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal " id="conversionModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Table output</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="conversionArea" style="display: flex; flex-direction: row">
+                    <table id="conversionTable">
+                        <thead>
+                            <tr>
+                                <th>Conversion output</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!--                <button type="button" class="btn btn-primary"> <i class="fas fa-copy"></i> Copy to clipboard</button>
+-->
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<br />
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+
+</body>
+<footer class="pt-4 my-md-5 pt-md-5 border-top container-fluid">
+    <div class="row">
+        <div class="col-12 col-md">
+            <h3>A-linement</h3>
+            <ul class="list-unstyled text-small">
+                <li><a class="text-muted" href="#">Francesco Vitucci</a></li>
+                <li><a class="text-muted" href="#">Paolo Pirruccio</a></li>
+                <li><a class="text-muted" href="#">Michele Zangheri</a></li>
+                <li><a class="text-muted" href="#">Stuff for developers</a></li>
+                <li><a class="text-muted" href="#">Another one</a></li>
+                <li><a class="text-muted" href="#">Last time</a></li>
+            </ul>
+        </div>
+        <div class="col-12 col-md">
+            <p>© Paolo Pirruccio, Michele Zangheri, Francesco Vitucci 2022</p>
+        </div>
+
+    </div>
+</footer>
+</html>
