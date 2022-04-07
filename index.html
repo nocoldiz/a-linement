@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <script src="https://kit.fontawesome.com/d6394b12bf.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -56,6 +57,16 @@
         $(document).ready(function () {
 
             loadData();
+
+            function copyDivToClipboard(div) {
+                console.log(div);
+                var range = document.createRange();
+                range.selectNode(document.getElementById(div));
+                window.getSelection().removeAllRanges(); // clear current selection
+                window.getSelection().addRange(range); // to select text
+                document.execCommand("copy");
+                window.getSelection().removeAllRanges();// to deselect
+            }
 
             function loadData() {
                 if (localStorage.getItem("doc")) {
@@ -259,14 +270,14 @@
                         break;
                     case "srt":
                         $.each(lines, function (n, elem) {
-                        var buffer = [];
+                            var buffer = [];
 
                             if (elem && elem.includes("-->")) {
                                 var count = 0;
                                 var splitAt = 0;
                                 for (var i = 1; i < 5; i++) {
                                     buffer.push(lines[n + i]);
-                                    if (lines[n + i] && lines[n + i]==="") {
+                                    if (lines[n + i] && lines[n + i] === "") {
                                         break;
                                     }
                                 }
@@ -377,6 +388,12 @@
 
                 }
             });
+            $("#copySubs").click(function () {
+                copyDivToClipboard("conversionTable");
+            });
+            $("#copyTable").click(function () {
+                copyDivToClipboard("mainTable");
+            });
             $("#carica").click(function () {
                 if (
                     confirm("Do you want to load the last saved version?") == true
@@ -406,6 +423,7 @@
                     thead: false,
                     attrs: {
                         class: "table",
+                        id: "mainTable"
                     },
                 });
                 $("#tableArea").empty();
@@ -430,40 +448,9 @@
                         $this.append(this);
                     });
                 });
-                $("#copyclipboard").click(function () {
-                    var r = document.createRange();
-                    r.selectNode(document.getElementById("tableArea"));
-                    window.getSelection().removeAllRanges();
-                    window.getSelection().addRange(r);
-                    document.execCommand('copy');
-                    window.getSelection().removeAllRanges();
 
-
-                }
-                );
                 $('#tableModal').modal('show')
 
-                /*
-                      $("table").each(function () {
-                        var $this = $(this);
-                        var newrows = [];
-                        $this.find("tr").each(function () {
-                          var i = 0;
-                          $(this)
-                            .find("td,th")
-                            .each(function () {
-                              i++;
-                              if (newrows[i] === undefined) {
-                                newrows[i] = $("<tr></tr>");
-                              }
-                              newrows[i].append($(this));
-                            });
-                        });
-                        $this.find("tr").remove();
-                        $.each(newrows, function () {
-                          $this.append(this);
-                        });
-                      });*/
             });
         });
     </script>
@@ -500,7 +487,7 @@
             <button id="convertisub" type="submit" value="Carica"> <i class="fas fa-folder-open"></i> Convert
                 subs file</button>
         </li>
-        <li> <input class="form-control" type="file" id="fileinput">
+        <li> <input class="form-control" accept=".srt, .ass" type="file" id="fileinput">
         </li>
 
 
@@ -576,7 +563,10 @@
             <div class="modal-footer">
                 <!--                <button type="button" class="btn btn-primary"> <i class="fas fa-copy"></i> Copy to clipboard</button>
 -->
+                <button type="button" id="copyTable" class="btn btn-secondary">Copy table</button>
+
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
             </div>
         </div>
     </div>
@@ -608,6 +598,8 @@
             <div class="modal-footer">
                 <!--                <button type="button" class="btn btn-primary"> <i class="fas fa-copy"></i> Copy to clipboard</button>
 -->
+                <button type="button" id="copySubs" class="btn btn-secondary">Copy subtitles</button>
+
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -625,12 +617,10 @@
         <div class="col-12 col-md">
             <h3>A-linement</h3>
             <ul class="list-unstyled text-small">
-                <li><a class="text-muted" href="#">Francesco Vitucci</a></li>
-                <li><a class="text-muted" href="#">Paolo Pirruccio</a></li>
+                <li><a class="text-muted" href="https://www.unibo.it/sitoweb/francesco.vitucci">Francesco Vitucci</a>
+                </li>
+                <li><a class="text-muted" href="https://www.paolopirrucciodev.it/#/home">Paolo Pirruccio</a></li>
                 <li><a class="text-muted" href="#">Michele Zangheri</a></li>
-                <li><a class="text-muted" href="#">Stuff for developers</a></li>
-                <li><a class="text-muted" href="#">Another one</a></li>
-                <li><a class="text-muted" href="#">Last time</a></li>
             </ul>
         </div>
         <div class="col-12 col-md">
@@ -639,4 +629,5 @@
 
     </div>
 </footer>
+
 </html>
