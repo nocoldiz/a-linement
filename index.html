@@ -250,7 +250,21 @@
                 }
 
                 var coltext = [];
+                var skipModal = false;
                 switch (subsType) {
+                    case "json":
+                        var jsonFile = JSON.parse(loadedFile);
+                        console.log(jsonFile);
+                        skipModal = true;
+                        for (let i = 1; i < 11; i++) {
+                            // splitElement.unshift(headerElement);
+                            $("#textarea" + i).val(jsonFile[i-1].content);
+                        }
+                        for (let i = 1; i < 11; i++) {
+                            // splitElement.unshift(headerElement);
+                            $("#label" + i).val(jsonFile[i-1].label);
+                        }
+                        break;
                     case "ass":
                         $.each(lines, function (n, elem) {
                             if (elem.startsWith("Dialogue")) {
@@ -277,7 +291,13 @@
                             if (elem && elem.includes("-->")) {
                                 var count = 0;
                                 var splitAt = 0;
+                 
                                 for (var i = 1; i < 5; i++) {
+                                    // Remove last character if is number
+                                    if(!isNaN(parseFloat(lines[n + i])) && !isNaN(lines[n + i] - 0) ){
+                                        break;
+                                    }
+
                                     buffer.push(lines[n + i]);
                                     if (lines[n + i] && lines[n + i] === "") {
                                         break;
@@ -294,17 +314,18 @@
 
                         break;
                 }
-
-                $("#conversionArea").val(coltext);
-                console.log(coltext);
-                $('#conversionModal').modal('show')
-                var tbody = $('#conversionTable tbody'),
-                    props = ["ReservNum", "Guest Name", "Status", "Arrival", "Departure", "Type"];
-                $.each(coltext, function (i, col) {
-                    var tr = $('<tr>');
-                    $('<td>').html(col).appendTo(tr);
-                    tbody.append(tr);
-                });
+                if (!skipModal) {
+                    $("#conversionArea").val(coltext);
+                    console.log(coltext);
+                    $('#conversionModal').modal('show')
+                    var tbody = $('#conversionTable tbody'),
+                        props = ["ReservNum", "Guest Name", "Status", "Arrival", "Departure", "Type"];
+                    $.each(coltext, function (i, col) {
+                        var tr = $('<tr>');
+                        $('<td>').html(col).appendTo(tr);
+                        tbody.append(tr);
+                    });
+                }
 
                 var file = $('#fileinput')[0].files[0]
                 if (file) {
@@ -317,21 +338,6 @@
 
 
                 var myFile = $('#fileinput').prop('files');
-                // console.log(myFile);
-
-                var fileReader = new FileReader();
-                fileReader.onload = function () {
-                    var data = fileReader.result;  // data <-- in this var you have the file data in Base64 format
-                    //   console.log(data.toString());
-                    var decodedStringAtoB = atob(data.toString());
-                    //   console.log(decodedStringAtoB);
-
-                    let base64ToString = Buffer.from(data, "base64").toString();
-                    base64ToString = JSON.parse(base64ToString);
-                    //   console.log(base64ToString);
-
-                };
-                fileReader.readAsDataURL($('#fileinput').prop('files')[0]);
             });
 
             //Click callbacks
@@ -406,13 +412,31 @@
 
                 }
             });
-            $("#carica").click(function () {
-                if (
-                    confirm("Do you want to load the last saved version?") == true
-                ) {
-                    loadData();
+            $("#esporta").click(function () {
+                console.log("esporta");
+                let colArray = [];
+                for (let i = 1; i <= 10; i++) {
+                    var colContent = document.getElementById("textarea" + i).value || "";
+                    var label = document.getElementById("label" + i).value || "Column" + i;
+                    colArray.push({ label: label, content: colContent });
+                    console.log(colContent);
+
 
                 }
+                var element = document.createElement('a');
+                element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(colArray)));
+                element.setAttribute('download', "document");
+
+                element.style.display = 'none';
+                document.body.appendChild(element);
+
+                element.click();
+
+                document.body.removeChild(element);
+
+
+
+
             });
             $("#converti").click(function () {
                 var gridMaster = [];
@@ -481,16 +505,16 @@
         </li>
         <li class="nav-item">
             <button id="salva" type="submit" value="Salva"> <i class="fa-solid fa-floppy-disk"></i> Save
-                </button>
+            </button>
         </li>
         <li class="nav-item">
             <button id="carica" type="submit" value="Carica"> <i class="fas fa-folder-open"></i> Load</button>
         </li>
         <li class="nav-item">
-            <button id="carica" type="submit" value="Carica"> <i class="fas fa-folder-open"></i> Export json</button>
+            <button id="esporta" type="submit" value="Esporta"> <i class="fas fa-folder-open"></i> Export json</button>
         </li>
         <li class="nav-item">
-            <button id="convertisub" type="submit" value="Carica"> <i class="fas fa-folder-open"></i> Convert
+            <button id="convertisub" type="submit" value="Converti"> <i class="fas fa-folder-open"></i> Convert
                 subs file</button>
         </li>
         <li> <input class="form-control" accept=".srt, .ass, .json" type="file" id="fileinput">
@@ -626,7 +650,8 @@
                 <li><a class="text-muted" href="https://www.unibo.it/sitoweb/francesco.vitucci">Francesco Vitucci</a>
                 </li>
                 <li><a class="text-muted" href="https://www.paolopirrucciodev.it/#/home">Paolo Pirruccio</a></li>
-                <li><a class="text-muted" href="https://www.linkedin.com/in/michele-zangheri-51b64511b">Michele Zangheri</a></li>
+                <li><a class="text-muted" href="https://www.linkedin.com/in/michele-zangheri-51b64511b">Michele
+                        Zangheri</a></li>
             </ul>
         </div>
         <div class="col-12 col-md">
