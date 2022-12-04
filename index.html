@@ -157,7 +157,10 @@
                         for (var k = 0; k < maxRigheTotal; k++) {
                             var lastWord = words.length;
                             if (words[k]) {
-                                wordsInColumn=wordsInColumn+1;
+                                let splitWords = words[k].split(" ").filter(n => n).length
+                                console.log(splitWords)
+                     
+                                wordsInColumn=wordsInColumn+splitWords;
                                 if (j == 0) {
                                     row.append($("<td style='border: 1px solid black;' />").html(words[k]));
                                 } else {
