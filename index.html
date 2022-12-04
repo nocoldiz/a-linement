@@ -28,6 +28,7 @@
         .modal-body {
             overflow-y: scroll;
         }
+        .statTable * {padding: 10px}
     </style>
     <!---------------JQUERY CODE----------------->
 
@@ -35,6 +36,10 @@
     <script>
         var loadedFile = null;
         var subsType = "ass";
+        var totalWordsInColumn = [];
+        var headerList = [];
+
+
         $(document).on("input", "input:file", function (e) {
             let targetFile = e.target.files[0];
 
@@ -59,7 +64,6 @@
             loadData();
 
             function copyDivToClipboard(div) {
-                console.log(div);
                 var range = document.createRange();
                 range.selectNode(document.getElementById(div));
                 window.getSelection().removeAllRanges(); // clear current selection
@@ -122,6 +126,7 @@
                     labelsArray.push(test);
                 }
                 // loop through all the rows, we will deal with tfoot and thead later
+                headerList = labelsArray;
 
                 var maxRigheW = 0;
                 var maxRigheF = 0;
@@ -145,17 +150,15 @@
                 tables.forEach((phrases, index) => {
                     row = $("<tr />");
                     var flagLastPhrase = false;
+                    var wordsInColumn = 0;
                     //Add Table name as header
-                    row.append($("<td style='border: 1px solid black;' />").html(labelsArray[index]));
-
-
+                    row.append($("<td style='border: 1px solid black;' />").html(labelsArray[index] || "-"));
                     phrases.forEach((words, j) => {
                         for (var k = 0; k < maxRigheTotal; k++) {
                             var lastWord = words.length;
                             if (words[k]) {
+                                wordsInColumn=wordsInColumn+1;
                                 if (j == 0) {
-                                    console.log(labelsArray);
-
                                     row.append($("<td style='border: 1px solid black;' />").html(words[k]));
                                 } else {
                                     row.append(
@@ -187,8 +190,7 @@
                             }
                         }
                     });
-
-
+                    totalWordsInColumn[index]=wordsInColumn;
                     rows.push(row);
                 });
                 //Add index
@@ -202,12 +204,11 @@
 
                     }
                 }
-
                 // add all the rows
                 table.append(headerRow);
 
-                for (i = 0; i < rows.length; i = i + 1) {
 
+                for (i = 0; i < rows.length; i = i + 1) {
                     table.append(rows[i]);
                 }
 
@@ -254,7 +255,6 @@
                 switch (subsType) {
                     case "json":
                         var jsonFile = JSON.parse(loadedFile);
-                        console.log(jsonFile);
                         skipModal = true;
                         for (let i = 1; i < 11; i++) {
                             // splitElement.unshift(headerElement);
@@ -316,7 +316,6 @@
                 }
                 if (!skipModal) {
                     $("#conversionArea").val(coltext);
-                    console.log(coltext);
                     $('#conversionModal').modal('show')
                     var tbody = $('#conversionTable tbody'),
                         props = ["ReservNum", "Guest Name", "Status", "Arrival", "Departure", "Type"];
@@ -329,7 +328,6 @@
 
                 var file = $('#fileinput')[0].files[0]
                 if (file) {
-                    //    console.log(file);
                     $.get(file, function (data) {
                     }, 'text');
 
@@ -346,6 +344,7 @@
                     for (let i = 1; i < 11; i++) {
                         // splitElement.unshift(headerElement);
                         $("#textarea" + i).val("");
+                        $("#statArea").empty();
                         $("#tableArea").empty();
                         $("#conversionTable tbody").empty();
 
@@ -378,6 +377,10 @@
 
                 if (alert(text) == true) {
                 }
+            });
+            $("#info").click(function () {
+                let bold = alert("Use the symbol '*' when writing inside a column to split the line newline\n Wrap the text inside the tag <b>Example text</b> to make bold text", "");
+
             });
             $("#salva").click(function () {
                 if (confirm("Do you want to save the document?") == true) {
@@ -413,31 +416,21 @@
                 }
             });
             $("#esporta").click(function () {
-                console.log("esporta");
                 let colArray = [];
                 for (let i = 1; i <= 10; i++) {
                     var colContent = document.getElementById("textarea" + i).value || "";
                     var label = document.getElementById("label" + i).value || "Column" + i;
                     colArray.push({ label: label, content: colContent });
-                    console.log(colContent);
-
-
                 }
                 var element = document.createElement('a');
                 element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(colArray)));
                 element.setAttribute('download', "document");
-
                 element.style.display = 'none';
                 document.body.appendChild(element);
-
                 element.click();
-
                 document.body.removeChild(element);
-
-
-
-
             });
+            
             $("#converti").click(function () {
                 var gridMaster = [];
                 for (var i = 1; i <= 10; i++) {
@@ -446,7 +439,6 @@
                         gridMaster.push(tableToWrite);
                     } catch (err) { }
                 }
-                console.log(gridMaster);
                 var table = arrayToTable(gridMaster, {
                     thead: false,
                     attrs: {
@@ -454,8 +446,28 @@
                         id: "mainTable"
                     },
                 });
+                var totalRow = $("<tr />")
+                var statHeaderRow = $("<tr />")
+
+                totalRow.append($("<td style='border: 1px solid black; height: 20px;width: 20px'' />").html("Total"));
+                statHeaderRow.append($("<td style='border: 1px solid black; height: 20px;width: 20px'' />").html("Column"));
+
+
+                for (i = 0; i < headerList.length; i = i + 1) {
+                    statHeaderRow.append($("<td style='border: 1px solid black; height: 20px;width: 20px'' />").html(headerList[i]||"-"));
+                }
+                for (i = 0; i < totalWordsInColumn.length; i = i + 1) {
+                    totalRow.append($("<td style='border: 1px solid black; height: 20px;width: 20px'' />").html(totalWordsInColumn[i]));
+                }
+                // add all the rows
                 $("#tableArea").empty();
+                $("#statArea").empty();
+
                 $("#tableArea").append(table);
+                $("#statArea").append(statHeaderRow);
+                $("#statArea").append(totalRow);
+
+
                 $(".table").each(function () {
                     var $this = $(this);
                     var newrows = [];
@@ -517,6 +529,9 @@
             <button id="convertisub" type="submit" value="Converti"> <i class="fas fa-folder-open"></i> Convert
                 subs file</button>
         </li>
+        <li class="nav-item">
+            <button id="info" type="submit" value="Info"> <i class="fas fa-info"></i> Info</button>
+        </li>
         <li> <input class="form-control" accept=".srt, .ass, .json" type="file" id="fileinput">
         </li>
 
@@ -528,50 +543,50 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 1" id="label1" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 1 name" id="label1" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea1" rows="30" cols="20"></textarea>
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 2" id="label2" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 2 name" id="label2" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea2" rows="30" cols="20"></textarea>
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 3" id="label3" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 3 name" id="label3" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea3" rows="30" cols="20"></textarea>
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 4" id="label4" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 4 name" id="label4" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea4" rows="30" cols="20"></textarea>
 
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 5" id="label5" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 5 name" id="label5" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea5" rows="30" cols="20"></textarea>
 
         </div>
 
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 6" id="label6" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 6 name" id="label6" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea6" rows="30" cols="20"></textarea>
 
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 7" id="label7" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 7 name" id="label7" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea7" rows="30" cols="20"></textarea>
 
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 8" id="label8" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 8 name" id="label8" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea8" rows="30" cols="20"></textarea>
 
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 9" id="label9" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 9 name" id="label9" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea9" rows="30" cols="20"></textarea>
 
         </div>
         <div class="col-sm-2">
-            <input type="text" class="form-control" placeholder="Column 10" id="label10" value=""></input>
+            <input type="text" class="form-control" placeholder="Column 10 name" id="label10" value=""></input>
             <textarea class="form-control" aria-label="With textarea" id="textarea10" rows="30" cols="20"></textarea>
 
         </div>
@@ -587,7 +602,10 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body">   
+                <div style="display: flex; flex-direction: row; padding-bottom: 40px;">
+                    <table id="statArea" class="statTable"></table>
+                </div>
                 <div id="tableArea" style="display: flex; flex-direction: row"></div>
             </div>
             <div class="modal-footer">
