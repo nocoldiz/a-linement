@@ -381,6 +381,23 @@
                 if (alert(text) == true) {
                 }
             });
+            $("#searchWord").click(function () {
+                let searchName = prompt("Insert the word to search", "");
+                if (searchName == null || searchName == "") {
+                } else {
+                    let colNumber = prompt("Insert the number of the column where to search", "1");
+                    colNumber = parseInt(colNumber);
+                    if (colNumber == null || colNumber <=0 || colNumber >10) {
+                        alert("Column number not valid, please insert a number between 1 anb 10");
+                    } else {
+
+                        let temp = $("#textarea" + colNumber).val();
+                        let tempName = $("#label" + colNumber).val();
+                        let occurences = temp.split(searchName).length - 1;
+                        alert("Found "+occurences+" occurences of the word '"+searchName+"' in column "+ tempName || colNumber);
+                    }
+                }
+            });
             $("#info").click(function () {
                 let bold = alert("Use the symbol * when writing inside a column to split the line newline\n Wrap the text inside the tag <b>Example text</b> to make bold text", "");
             });
@@ -532,8 +549,12 @@
                 subs file</button>
         </li>
         <li class="nav-item">
+            <button id="searchWord" type="submit" value="Search"> <i class="fas fa-search"></i> Search</button>
+        </li>
+        <li class="nav-item">
             <button id="info" type="submit" value="Info"> <i class="fas fa-info"></i> Info</button>
         </li>
+        
         <li> <input class="form-control" accept=".srt, .ass, .json" type="file" id="fileinput">
         </li>
 
