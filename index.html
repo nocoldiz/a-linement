@@ -391,9 +391,9 @@
                         alert("Column number not valid, please insert a number between 1 anb 10");
                     } else {
 
-                        let temp = $("#textarea" + colNumber).val();
+                        let temp = $("#textarea" + colNumber).val().toLowerCase();
                         let tempName = $("#label" + colNumber).val();
-                        let occurences = temp.split(searchName).length - 1;
+                        let occurences = temp.split(searchName.toLowerCase()).length - 1;
                         alert("Found "+occurences+" occurences of the word '"+searchName+"' in column "+ tempName || colNumber);
                     }
                 }
